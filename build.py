@@ -14,7 +14,7 @@ def get_scene_line_numbers(filename):
     with open(filename, 'r') as f:
         for line_num, line in enumerate(f, 1):
             # Look for class definitions that might be scenes
-            match = re.match(r'class\s+(\w+)', line.strip())
+            match = re.match(r'class\s+(\w+)\s*\([^)]*\bTTSScene\b[^)]*\)', line.strip())
             if match:
                 scene_name = match.group(1)
                 scene_positions[scene_name] = line_num
@@ -102,22 +102,16 @@ def main():
     threads = args.threads
     quality = args.quality
 
-    quality_params = "qm"
-    quality_name = "1080p60"
-    quality_merge = "medium"
+    quality_mapping = {
+        "low": ("ql", "480p15", "ultrafast"),
+        "high": ("qk", "2160p60", "veryslow"),
+    }
 
-    if quality == "medium":
-        quality_params = "qm"
-        quality_name = "1080p60"
-        quality_merge = "medium"
-    elif quality == "low":
-        quality_params = "ql"
-        quality_name = "480p15"
-        quality_merge = "ultrafast"
-    else:
-        quality_params = "qk"
-        quality_name = "2160p60"
-        quality_merge = "veryslow"
+    # Default to medium if not "low" or "high"
+    quality_params, quality_name, quality_merge = quality_mapping.get(
+        quality, 
+        ("qm", "1080p60", "medium")  # Explicit medium default
+    )
 
     try:
         # Step 1: Get line numbers for all scenes

@@ -126,7 +126,7 @@ class MolecularWeights(TTSScene):
             """,
             Create(h_group),
             Create(o_group),
-            balance.animate.rotate(30*DEGREES, about_point=balance.stand.get_top()),
+            balance.animate.rotate(-30*DEGREES, about_point=balance.stand.get_top()),
             run_time=2
         )
         self.play(FadeOut(h_group), FadeOut(o_group), FadeOut(balance))
