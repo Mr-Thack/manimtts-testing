@@ -1,0 +1,6 @@
+media/
+__pycache__/
+voices/
+*.mp4
+*.onnx
+voices.json
