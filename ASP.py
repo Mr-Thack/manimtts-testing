@@ -37,22 +37,18 @@ class MoleConcept(TTSScene):
     def construct(self):
         # Mole image with Avogadro overlay
         mole = ImageMobject("images/mole.png").scale(2)
-        avogadro_overlay = Tex("6.022$\\times$10$^{23}$", color=RED).scale(0.7)
         
         self.add_voice(
             """
             Okay, so first of all - what even is a mole?
-            ... ... ...
-            No, not this cute little thing!
             """,
-            FadeIn(mole),
-            FadeIn(avogadro_overlay)
+            FadeIn(mole)
         )
         
         # Enhanced egg to atom transition
-        self.play(
-            mole.animate.scale(0.3).to_edge(UP),
-            avogadro_overlay.animate.next_to(mole, DOWN)
+        self.add_voice(
+            "No, not this cute little thing!",
+            mole.animate.scale(0).to_edge(UP),
         )
 
         # Original egg carton visualization
@@ -64,7 +60,7 @@ class MoleConcept(TTSScene):
         
         # Formula introduction
         formula = MathTex(
-            "\\text{moles}", "=", "\\frac{\\text{particles}}{6.022\\times10^{23}}"
+            "\\text{moles}", "=", "\\frac{\\text{\\# Particles}}{6.022\\times10^{23}}"
         ).set_color_by_tex("moles", BLUE).set_color_by_tex("particles", GREEN).set_color_by_tex("6.022", RED)
         
         self.add_voice(
@@ -75,9 +71,9 @@ class MoleConcept(TTSScene):
         )
 
         # Rest of original atom transformation remains
-        atoms = VGroup(*[Circle(radius=0.05, color=BLUE, fill_opacity=1) for _ in range(900)])
-        atoms.arrange_in_grid(rows=30, cols=30, buff=0.1)
-        mole_label = Text("1 mole = 6.022 × 10²³ particles", font_size=30)
+        atoms = VGroup(*[Circle(radius=0.125, color=BLUE, fill_opacity=1) for _ in range(16 * 9 * 4)])
+        atoms.arrange_in_grid(rows=9*2, cols=16*2, buff=0.125)
+        mole_label = Text("1 mole = 6.022 × 10²³ particles", font_size=30, color=RED)
         
         self.add_voice(
             """
@@ -85,10 +81,32 @@ class MoleConcept(TTSScene):
             ...
             That's a lot of atoms!
             """,
-            Transform(dozen_group, atoms),
-            Transform(dozen_label, mole_label)
+            ReplacementTransform(dozen_group, atoms),
+            ReplacementTransform(dozen_label, mole_label),
+            formula.animate.scale(0).to_edge(UP)
         )
-        self.play(FadeOut(dozen_group), FadeOut(dozen_label))
+
+        avogadro_title = Text("Avogadro's Number", font_size=36, color=ORANGE)
+        avogadro_label = MathTex("6.02 \\times 10^{23}", color=RED)
+
+        avogadro_group = VGroup(
+            avogadro_title,
+            avogadro_label
+        ).arrange(DOWN)
+        
+        self.add_voice(
+            """
+            Since we often work with incredibly large numbers of particles in Chemistry,
+            we use a number called AhvohGahdroh's Number: ... 6.02 times 10 to the power of 23.
+            ... ... ...
+            This constant represents the number of particles in one mole of anything.
+            """,
+            FadeIn(avogadro_title),
+            ReplacementTransform(mole_label, avogadro_label)
+        )
+
+        self.play(FadeOut(atoms), FadeOut(avogadro_group))
+        self.wait()
 
 class MolecularWeights(TTSScene):
     def construct(self):
@@ -126,7 +144,10 @@ class MolecularWeights(TTSScene):
             """,
             Create(h_group),
             Create(o_group),
-            balance.animate.rotate(-30*DEGREES, about_point=balance.stand.get_top()),
+            balance.beam.animate.rotate(
+                -20*DEGREES,
+                about_point=balance.beam.get_center()
+            ),
             run_time=2
         )
         self.play(FadeOut(h_group), FadeOut(o_group), FadeOut(balance))
@@ -143,12 +164,13 @@ class PeriodicTable(TTSScene):
         element_group = VGroup(element, element_text)
         
         self.play(Create(table))
-        element_group.move_to(table).next_to(table, LEFT).shift(RIGHT*0.5)
+        element_group.move_to(table).next_to(table, LEFT).shift(RIGHT * 2)
         
         self.add_voice(
             "Here's where the periodic table becomes your best friend! Let's zoom in on sodium, or N A.",
             Create(element_group),
-            Flash(element_text[1], color=GOLD, run_time=2)
+            Flash(element_text[1], color=GOLD, run_time=2),
+            voice_factor=0.8
         )
         
         self.add_voice(
@@ -163,9 +185,12 @@ class PeriodicTable(TTSScene):
             Every element on the periodic table has its own unique atomic mass. 
             The atomic mass is how much one mole of that element weighs.
             """,
-            element_group.animate.scale(2),
-            table.animate.scale(2),
-            element_text[1].animate.set_color(WHITE)
+            AnimationGroup(
+                element_group.animate.scale(2).move_to(ORIGIN),
+                table.animate.scale(2),
+                lag_ratio=0
+            ),
+            # element_text[1].animate.set_color(WHITE)
         )
         self.play(FadeOut(table), FadeOut(element_group))
 
@@ -175,34 +200,106 @@ class FlowchartInterlude(TTSScene):
         mass = Text("Mass (g)", color=GREEN)
         moles = Text("Moles", color=BLUE)
         particles = Text("Particles", color=RED).scale(0.9)
-        
+
+        flowchart_elements = VGroup(mass, moles, particles)
+        flowchart_elements.arrange(RIGHT, buff=2)
+
         arrows = VGroup(
             Arrow(mass.get_right(), moles.get_left(), buff=0.1),
             Arrow(moles.get_right(), particles.get_left(), buff=0.1),
-            Arrow(particles.get_left(), moles.get_right(), buff=0.1).flip(),
-            Arrow(moles.get_left(), mass.get_right(), buff=0.1).flip()
+            Arrow(particles.get_left(), moles.get_right(), buff=0.1),
+            Arrow(moles.get_left(), mass.get_right(), buff=0.1)
         )
+        arrows[0].shift(UP)
+        arrows[1].shift(UP)
+        arrows[2].shift(DOWN)
+        arrows[3].shift(DOWN)
         
         labels = VGroup(
-            MathTex("\\div\\text{molar mass}").next_to(arrows[0], UP),
+            MathTex("\\div\\text{Molar Mass}").next_to(arrows[0], UP),
             MathTex("\\times\\text{Avogadro}").next_to(arrows[1], UP),
             MathTex("\\div\\text{Avogadro}").next_to(arrows[2], DOWN),
-            MathTex("\\times\\text{molar mass}").next_to(arrows[3], DOWN)
+            MathTex("\\times\\text{Molar Mass}").next_to(arrows[3], DOWN)
         )
-        
+       
+        intro_title = Text("Ultimate Conversion Roadmap", font_size=40)
+
         self.add_voice(
-            "Remember this conversion roadmap...",
+            "Now that we've seen the pieces, let's put them all together into the Ultimate Conversion Roadmap.",
+            FadeIn(intro_title)
+        )
+
+        self.add_voice(
+            "The first point on our diagram is the mass, (in grams)",
+            FadeOut(intro_title),
+            FadeIn(mass, shift=UP)
+        )
+
+        self.wait(.5)
+
+        self.add_voice(
+            """
+            The second point, is the mole.
+            This is our central transportation hub.
+            All conversions must go through the mole first.
+            """,
+            FadeIn(moles, shift=UP)
+        )
+
+        self.wait(.5)
+
+        self.add_voice(
+            "And our final stop, is the world of counting individual atoms and molecules.",
+            FadeIn(particles, shift=UP)
+        )
+
+        self.add_voice(
+            """
+            See how moles are in the center?
+
+            ... ... ...
+
+            It's as if everything rotates around them!
+
+            ... ... ...
+
+            Moles are the central unit of Chemistry.
+            Whenever you convert anything between any units, make sure to convert to moles first!
+            Then convert to whatever unit you want after that.
+
+            ... ... ...
+
+            This will prevent you from making many mistakes.
+            """,
+            *[
+                Rotate(
+                    item,
+                    angle=720 * DEGREES,
+                    about_point=ORIGIN,
+                    run_time=12,
+                    rate_func=rate_functions.ease_in_quint
+                )
+                for item in (mass, particles) 
+            ],
+            voice_factor=0.6
+        )
+
+
+        self.add_voice(
+            """
+            When leaving the mole station ... multiply.
+            When returning ... divide.
+            ...
+            When converting between grams and moles, multiply or divide by molecular mass.
+            When converting between particles and moles, multiply or divide by AhvohGahdroh's Number.
+            """,
             LaggedStart(
-                FadeIn(mass, shift=UP),
-                FadeIn(moles, shift=UP),
-                FadeIn(particles, shift=UP),
-                LaggedStartMap(GrowArrow, arrows),
+                LaggedStartMap(GrowArrow, arrows, lag_ratio=0),
                 LaggedStartMap(Write, labels),
                 lag_ratio=0.3
             )
         )
-        self.play(FadeOut(mass), FadeOut(moles), FadeOut(particles), 
-                 FadeOut(arrows), FadeOut(labels))
+        self.play(*[FadeOut(o) for o in (mass, moles, particles, arrows, labels)])
 
 class ChemistryConversions(TTSScene):
     def construct(self):
@@ -224,21 +321,6 @@ class ChemistryConversions(TTSScene):
             })
             return eq
 
-        # Original Avogadro introduction
-        avogadro_group = VGroup(
-            Text("Avogadro's Number", font_size=36),
-            MathTex("6.02 \\times 10^{23}", color=RED)
-        ).arrange(DOWN)
-        
-        self.add_voice(
-            """
-            In chemistry, we often work with incredibly large numbers of atoms and molecules.
-            To make these calculations manageable, we use AhvohGahdroh's Number:
-            6.02 times 10 to the power of 23.
-            This constant represents the number of particles in one mole of anything.
-            """,
-            Write(avogadro_group)
-        )
 
         # Example 1 with particle animation
         example1_problem = MathTex(
@@ -251,23 +333,28 @@ class ChemistryConversions(TTSScene):
         
         particles = VGroup(*[Dot(radius=0.03, color=BLUE) for _ in range(100)])
         particles.arrange_in_grid(rows=10, cols=10, buff=0.1)
-        particle_container = Circle(radius=1, color=WHITE, fill_opacity=0)
-        
+        particle_container = Circle(radius=1.1, color=WHITE, fill_opacity=0)
+        particles.move_to(particle_container) 
+
         self.add_voice(
             "Let's look at our first conversion example...",
-            FadeOut(avogadro_group),
-            LaggedStartMap(FadeIn, particles),
             Create(particle_container),
-            particles.animate.move_to(particle_container),
-            FadeOut(particles),
-            FadeOut(particle_container),
+            LaggedStartMap(FadeIn, particles),
             Write(example1_problem)
         )
 
+        self.add_voice(
+            """
+            Here, we are converting Sodium particles to moles.
+            """,
+            LaggedStartMap(FadeOut, particles),
+            FadeOut(particle_container),
+            Write(example1_problem)
+        )
         # Remaining examples with color coding
         example1_solution.next_to(example1_problem, DOWN)
         self.add_voice(
-            "Dividing our number of particles...",
+            "Dividing our number of particles by AhvohGahdroh's Number, we get 2 Moles of Sodium.",
             Write(example1_solution)
         )
 
@@ -285,8 +372,8 @@ class Summary(TTSScene):
         # Conversion summary table
         table = Table(
             [["Particles → Moles", "$\\div$ Avogadro"],
-             ["Moles → Mass", "$\\times$ molar mass"],
-             ["Mass → Moles", "$\\div$ molar mass"],
+             ["Moles → Mass", "$\\times$ Molar Mass"],
+             ["Mass → Moles", "$\\div$ Molar Mass"],
              ["Moles → Particles", "$\\times$ Avogadro"]],
             col_labels=[Text("Conversion"), Text("Formula")],
             include_outer_lines=True

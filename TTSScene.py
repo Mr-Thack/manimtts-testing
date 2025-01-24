@@ -78,7 +78,8 @@ class TTSScene(Scene):
             str(voice_path),
             time_offset=voice_offset
         )
-       
-        self.play(*args, **kwargs)
+
+        if len(args) != 0:
+            self.play(*args, **kwargs)
 
         self.wait((voice_length - voice_offset) * voice_factor)
