@@ -321,7 +321,6 @@ class ChemistryConversions(TTSScene):
             })
             return eq
 
-
         # Example 1 with particle animation
         example1_problem = MathTex(
             "\\text{Na atoms} = 1.204 \\times 10^{24} \\text{ particles}"
@@ -344,43 +343,109 @@ class ChemistryConversions(TTSScene):
         )
 
         self.add_voice(
-            """
-            Here, we are converting Sodium particles to moles.
-            """,
+            "Here, we are converting Sodium particles to moles.",
             LaggedStartMap(FadeOut, particles),
             FadeOut(particle_container),
-            Write(example1_problem)
         )
-        # Remaining examples with color coding
         example1_solution.next_to(example1_problem, DOWN)
         self.add_voice(
             "Dividing our number of particles by AhvohGahdroh's Number, we get 2 Moles of Sodium.",
             Write(example1_solution)
         )
 
-        # Original examples 2-4 remain with color coding
+        # Example 2: Moles to Mass (Iron) with animation
         example2_problem = MathTex("\\text{Fe} = 3.50 \\text{ moles}")
         example2_solution = color_code_equation(MathTex(
             "\\text{Mass} &= 3.50 \\text{ mol} \\times \\frac{55.85\\text{ g}}{1\\text{ mol}}",
             "\\\\&= 195.48 \\text{ g Fe}"
         ))
         
-        # ... (similar modifications for examples 3-4)
+        # Animation for moles (Fe)
+        moles_blocks = VGroup(*[Square(side_length=0.15, color=GREEN, fill_opacity=0.5) for _ in range(35)])
+        moles_blocks.arrange_in_grid(rows=5, cols=7, buff=0.1)
+        moles_container = Rectangle(width=2.5, height=1.5, color=WHITE, fill_opacity=0)
+        moles_blocks.move_to(moles_container)
 
-class Summary(TTSScene):
-    def construct(self):
-        # Conversion summary table
-        table = Table(
-            [["Particles → Moles", "$\\div$ Avogadro"],
-             ["Moles → Mass", "$\\times$ Molar Mass"],
-             ["Mass → Moles", "$\\div$ Molar Mass"],
-             ["Moles → Particles", "$\\times$ Avogadro"]],
-            col_labels=[Text("Conversion"), Text("Formula")],
-            include_outer_lines=True
-        ).scale(0.8)
-        
         self.add_voice(
-            "Let's review the key conversions...",
-            Create(table),
-            LaggedStartMap(FadeIn, table.get_entries())
+            """
+            For our second example, we have 3.5 moles of iron.
+            Iron has an atomic mass of 55.85 grams per mole.
+            To find the mass in grams, we'll multiply the moles by the atomic mass.
+            """,
+            FadeOut(example1_problem, example1_solution),
+            Create(moles_container),
+            LaggedStartMap(FadeIn, moles_blocks),
+            Write(example2_problem)
+        )
+
+        self.add_voice(
+            "Multiplying 3.50 moles by 55.85 grams per mole, we get 195.48 grams of iron.",
+            LaggedStartMap(FadeOut, moles_blocks),
+            FadeOut(moles_container),
+            Write(example2_solution)
+        )
+
+        # Example 3: Mass to Moles (Copper) with animation
+        example3_problem = MathTex("\\text{Cu} = 127.0 \\text{ g}")
+        example3_solution = color_code_equation(MathTex(
+            "\\text{moles} &= 127.0 \\text{ g} \\times \\frac{1\\text{ mol}}{63.55\\text{ g}}",
+            "\\\\&= 2.00 \\text{ mol Cu}"
+        ))
+        
+        # Animation for mass (Cu)
+        mass_icon = Rectangle(width=2, height=1, color=GOLD, fill_opacity=0.5)
+        mass_label = Tex("127.0 g", color=WHITE).scale(0.5).move_to(mass_icon)
+        mass_group = VGroup(mass_icon, mass_label)
+
+        self.add_voice(
+            """
+            Our third example starts with 127 grams of copper.
+            Copper's atomic mass is 63.55 grams per mole.
+            To convert to moles, we'll divide the mass by the atomic mass.
+            """,
+            FadeOut(example2_problem, example2_solution),
+            Create(mass_group),
+            Write(example3_problem)
+        )
+
+        self.add_voice(
+            "Dividing 127.0 grams by 63.55 grams per mole, we get exactly 2.00 moles of copper.",
+            FadeOut(mass_group),
+            Write(example3_solution)
+        )
+
+        # Example 4: Moles to Particles (Aluminum) with animation
+        example4_problem = MathTex("\\text{Al} = 1.50 \\text{ moles}")
+        example4_solution = color_code_equation(MathTex(
+            "\\text{particles} &= 1.50 \\text{ mol} \\times 6.02 \\times 10^{23} \\frac{\\text{particles}}{\\text{mol}}",
+            "\\\\&= 9.03 \\times 10^{23} \\text{ Al atoms}"
+        ))
+        
+        # Animation for particles (Al)
+        particles_al = VGroup(*[Dot(radius=0.03, color=BLUE) for _ in range(150)])
+        particles_al.arrange_in_grid(rows=10, cols=15, buff=0.1)
+        particle_container_al = Circle(radius=1.5, color=WHITE, fill_opacity=0)
+        particles_al.move_to(particle_container_al)
+
+        self.add_voice(
+            """
+            Finally, let's convert 1.50 moles of aluminum to atoms.
+            To find the number of atoms, we'll multiply the moles by AhvohGahdroh's Number
+            """,
+            FadeOut(example3_problem, example3_solution),
+            Create(particle_container_al),
+            LaggedStartMap(FadeIn, particles_al),
+            Write(example4_problem)
+        )
+
+        self.add_voice(
+            "Multiplying 1.50 moles by 6.02 times 10 to the power of 23 particles per mole, we get 9.03 times 10 to the power of 23 aluminum atoms.",
+            LaggedStartMap(FadeOut, particles_al),
+            FadeOut(particle_container_al),
+            Write(example4_solution)
+        )
+
+        self.add_voice(
+            "Thank you for watching! I hope you learned something!",
+            FadeOut(example4_solution)
         )

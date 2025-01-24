@@ -110,7 +110,7 @@ def main():
     # Default to medium if not "low" or "high"
     quality_params, quality_name, quality_merge = quality_mapping.get(
         quality, 
-        ("qm", "1080p60", "medium")  # Explicit medium default
+        ("qh", "1080p60", "medium")  # Explicit medium default
     )
 
     try:
